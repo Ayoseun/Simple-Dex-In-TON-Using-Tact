@@ -1,0 +1,396 @@
+#pragma version =0.4.4;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+#include "tact_TonkPumpFactory.headers.fc";
+#include "tact_TonkPumpFactory.stdlib.fc";
+#include "tact_TonkPumpFactory.constants.fc";
+#include "tact_TonkPumpFactory.storage.fc";
+
+;;
+;; Contract TonkPumpFactory functions
+;;
+
+(int, int, slice, int, int, cell) $TonkPumpFactory$_contract_init(int $id) impure inline_ref {
+    var (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)) = (null(), null(), null(), null(), null(), null());
+    $self'id = $id;
+    $self'stopped = false;
+    $self'owner = __tact_context_get_sender();
+    $self'contractsCounter = -1;
+    $self'DEPLOY_FEE = 500000000;
+    return ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs);
+}
+
+((int, int, slice, int, int, cell), slice) $TonkPumpFactory$_fun_jettonAddress((int, int, slice, int, int, cell) $self, int $tokenId) impure inline_ref {
+    var (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)) = $self;
+    tuple $pair = $DeployedPair$_load_opt(__tact_dict_get_int_cell($self'deployedPairs, 257, $tokenId));
+    if ((~ null?($pair))) {
+        return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), $DeployedPair$_get_jettonAddress($DeployedPair$_not_null($pair)));
+    }
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), null());
+}
+
+((int, int, slice, int, int, cell), slice) $TonkPumpFactory$_fun_ammContractAddress((int, int, slice, int, int, cell) $self, int $tokenId) impure inline_ref {
+    var (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)) = $self;
+    tuple $pair = $DeployedPair$_load_opt(__tact_dict_get_int_cell($self'deployedPairs, 257, $tokenId));
+    if ((~ null?($pair))) {
+        return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), $DeployedPair$_get_ammAddress($DeployedPair$_not_null($pair)));
+    }
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), null());
+}
+
+((int, int, slice, int, int, cell), int) $TonkPumpFactory$_fun_allContracts((int, int, slice, int, int, cell) $self) impure inline_ref {
+    var (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)) = $self;
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), ($self'contractsCounter + 1));
+}
+
+((int, int, slice, int, int, cell), int) $TonkPumpFactory$_fun_deployFee((int, int, slice, int, int, cell) $self) impure inline_ref {
+    var (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)) = $self;
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), $self'DEPLOY_FEE);
+}
+
+((int, int, slice, int, int, cell), slice) $TonkPumpFactory$_fun_myAddress((int, int, slice, int, int, cell) $self) impure inline_ref {
+    var (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)) = $self;
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), my_address());
+}
+
+((int, int, slice, int, int, cell), int) $TonkPumpFactory$_fun_id((int, int, slice, int, int, cell) $self) impure inline_ref {
+    var (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)) = $self;
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), $self'id);
+}
+
+((int, int, slice, int, int, cell), int) $TonkPumpFactory$_fun_balance((int, int, slice, int, int, cell) $self) impure inline_ref {
+    var (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)) = $self;
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), __tact_my_balance());
+}
+
+((int, int, slice, int, int, cell), ()) $TonkPumpFactory$_fun_deployJettonAndAMM((int, int, slice, int, int, cell) $self, (cell, slice, int) $msg) impure inline_ref {
+    var (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)) = $self;
+    var (($msg'content, $msg'ticker, $msg'v)) = $msg;
+    var ($jettonInit'code, $jettonInit'data) = $TonkPumpJetton$_init_child(__tact_context_sys, $self'owner, $Context$_get_sender(__tact_context_get()), $msg'content, $msg'v);
+    slice $jettonAddress = $global_contractAddress(($jettonInit'code, $jettonInit'data));
+    $global_send($SendParameters$_constructor_to_value_mode_code_data($jettonAddress, 50000000, 3, $jettonInit'code, $jettonInit'data));
+    throw_unless(26785, (~ null?($jettonAddress)));
+    var ($ammInit'code, $ammInit'data) = $TonkPumpAMM$_init_child(__tact_context_sys, $self'contractsCounter, $self'owner, $Context$_get_sender(__tact_context_get()), $jettonAddress, $msg'ticker, $msg'v);
+    slice $ammAddress = $global_contractAddress(($ammInit'code, $ammInit'data));
+    $global_send($SendParameters$_constructor_to_value_mode_code_data($ammAddress, 50000000, 3, $ammInit'code, $ammInit'data));
+    throw_unless(54687, (~ null?($ammAddress)));
+    $self'deployedPairs~__tact_dict_set_int_cell(257, $self'contractsCounter, $DeployedPair$_store_cell($DeployedPair$_constructor_jettonAddress_ammAddress($jettonAddress, $ammAddress)));
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), ());
+}
+
+((int, int, slice, int, int, cell), int) $TonkPumpFactory$_fun_get_contract_storage_fee((int, int, slice, int, int, cell) $self) impure inline_ref {
+    var (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)) = $self;
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), 100000000);
+}
+
+((int, int, slice, int, int, cell), ()) $TonkPumpFactory$_fun_requireOwner((int, int, slice, int, int, cell) $self) impure inline_ref {
+    var (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)) = $self;
+    throw_unless(132, ( __tact_slice_eq_bits($self'owner, __tact_context_get_sender()) ));
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), ());
+}
+
+((int, int, slice, int, int, cell), slice) $TonkPumpFactory$_fun_owner((int, int, slice, int, int, cell) $self) impure inline_ref {
+    var (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)) = $self;
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), $self'owner);
+}
+
+((int, int, slice, int, int, cell), ()) $TonkPumpFactory$_fun_requireNotStopped((int, int, slice, int, int, cell) $self) impure inline_ref {
+    var (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)) = $self;
+    throw_unless(40368, (~ $self'stopped));
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), ());
+}
+
+((int, int, slice, int, int, cell), ()) $TonkPumpFactory$_fun_requireStopped((int, int, slice, int, int, cell) $self) impure inline_ref {
+    var (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)) = $self;
+    throw_unless(53296, $self'stopped);
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), ());
+}
+
+((int, int, slice, int, int, cell), int) $TonkPumpFactory$_fun_stopped((int, int, slice, int, int, cell) $self) impure inline_ref {
+    var (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)) = $self;
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), $self'stopped);
+}
+
+;;
+;; Receivers of a Contract TonkPumpFactory
+;;
+
+(((int, int, slice, int, int, cell)), ()) %$TonkPumpFactory$_internal_empty((int, int, slice, int, int, cell) $self) impure inline {
+    var ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs) = $self;
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), ());
+}
+
+(((int, int, slice, int, int, cell)), ()) $TonkPumpFactory$_internal_binary_DeployContractAndAMM((int, int, slice, int, int, cell) $self, (cell, slice, int) $msg) impure inline {
+    var ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs) = $self;
+    var ($msg'content, $msg'ticker, $msg'v) = $msg;
+    ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)~$TonkPumpFactory$_fun_requireNotStopped();
+    throw_unless(18336, ($Context$_get_value(__tact_context_get()) > $self'DEPLOY_FEE));
+    int $availableBalance = (__tact_my_balance() - 100000000);
+    throw_unless(42834, ($availableBalance >= 100000000));
+    $self'contractsCounter = $self'contractsCounter + 1;
+    ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)~$TonkPumpFactory$_fun_deployJettonAndAMM($DeployContractAndAMM$_tensor_cast(($msg'content, $msg'ticker, $msg'v)));
+    int $excess = (($Context$_get_value(__tact_context_get()) - 100000000) - $self'DEPLOY_FEE);
+    if (($excess > 0)) {
+        $global_send($SendParameters$_constructor_to_value_mode(__tact_context_get_sender(), $excess, 2));
+    }
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), ());
+}
+
+((int, int, slice, int, int, cell), ()) $TonkPumpFactory$_internal_text_f2205fee0a5a8480985b163635e583260fb940b77ff1e7c166e20765dd8e7f78((int, int, slice, int, int, cell) $self) impure inline {
+    var ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs) = $self;
+    ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)~$TonkPumpFactory$_fun_requireNotStopped();
+    ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)~$TonkPumpFactory$_fun_requireOwner();
+    throw_unless(38006, ($Context$_get_value(__tact_context_get()) > 0));
+    $self'DEPLOY_FEE = $Context$_get_value(__tact_context_get());
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), ());
+}
+
+(((int, int, slice, int, int, cell)), ()) $TonkPumpFactory$_internal_binary_ChangeOwner((int, int, slice, int, int, cell) $self, (int, slice) $msg) impure inline {
+    var ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs) = $self;
+    var ($msg'queryId, $msg'newOwner) = $msg;
+    ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)~$TonkPumpFactory$_fun_requireNotStopped();
+    ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)~$TonkPumpFactory$_fun_requireOwner();
+    $self'owner = $msg'newOwner;
+    ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)~$TonkPumpFactory$_fun_reply($ChangeOwnerOk$_store_cell($ChangeOwnerOk$_constructor_queryId_newOwner($msg'queryId, $msg'newOwner)));
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), ());
+}
+
+((int, int, slice, int, int, cell), ()) $TonkPumpFactory$_internal_text_250b76e2b9576fc6b4c45129483006b0003a0c39b6f7ae413d177f4e3479dbca((int, int, slice, int, int, cell) $self) impure inline {
+    var ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs) = $self;
+    ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)~$TonkPumpFactory$_fun_requireNotStopped();
+    ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)~$TonkPumpFactory$_fun_requireOwner();
+    int $withdrawAmount = (__tact_my_balance() - 100000000);
+    throw_unless(48673, ($withdrawAmount > 0));
+    $global_send($SendParameters$_constructor_to_value_mode(__tact_context_get_sender(), $withdrawAmount, 2));
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), ());
+}
+
+(((int, int, slice, int, int, cell)), ()) $TonkPumpFactory$_internal_binary_SafeWithdraw((int, int, slice, int, int, cell) $self, (int) $msg) impure inline {
+    var ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs) = $self;
+    var ($msg'amount) = $msg;
+    ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)~$TonkPumpFactory$_fun_requireNotStopped();
+    ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)~$TonkPumpFactory$_fun_requireOwner();
+    int $maxWithdraw = (__tact_my_balance() - 100000000);
+    throw_unless(43103, ( (($msg'amount > 0)) ? (($msg'amount <= $maxWithdraw)) : (false) ));
+    $global_send($SendParameters$_constructor_to_value_mode(__tact_context_get_sender(), $msg'amount, 2));
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), ());
+}
+
+(((int, int, slice, int, int, cell)), ()) $TonkPumpFactory$_internal_binary_Deploy((int, int, slice, int, int, cell) $self, (int) $deploy) impure inline {
+    var ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs) = $self;
+    var ($deploy'queryId) = $deploy;
+    ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)~$TonkPumpFactory$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId)));
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), ());
+}
+
+((int, int, slice, int, int, cell), ()) $TonkPumpFactory$_internal_text_bcfaf776907c719cc8d379d8f194aaaa27e8ca2871cd591781721f215a454501((int, int, slice, int, int, cell) $self) impure inline {
+    var ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs) = $self;
+    ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)~$TonkPumpFactory$_fun_requireOwner();
+    ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)~$TonkPumpFactory$_fun_requireNotStopped();
+    $self'stopped = true;
+    ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)~$TonkPumpFactory$_fun_reply(__gen_cell_comment_8f4b6a166554b4f282855d0333c627d5b58d281ea4ba11e4def91a1053193b2d());
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), ());
+}
+
+((int, int, slice, int, int, cell), ()) $TonkPumpFactory$_internal_text_6c8f44f45fedb4cdfed4de8db14aa5b13ad55d430f759d0669210b74c48fe3df((int, int, slice, int, int, cell) $self) impure inline {
+    var ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs) = $self;
+    ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)~$TonkPumpFactory$_fun_requireOwner();
+    ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)~$TonkPumpFactory$_fun_requireStopped();
+    $self'stopped = false;
+    ($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs)~$TonkPumpFactory$_fun_reply(__gen_cell_comment_514f593ead485926515219a03034c6b162f1c29390f83f2f1bd70b8b77731ec3());
+    return (($self'stopped, $self'id, $self'owner, $self'contractsCounter, $self'DEPLOY_FEE, $self'deployedPairs), ());
+}
+
+;;
+;; Get methods of a Contract TonkPumpFactory
+;;
+
+_ %jettonAddress(int $$tokenId) method_id(114762) {
+    int $tokenId = $$tokenId;
+    var self = $TonkPumpFactory$_contract_load();
+    var res = self~$TonkPumpFactory$_fun_jettonAddress($tokenId);
+    return res;
+}
+
+_ %ammContractAddress(int $$tokenId) method_id(79483) {
+    int $tokenId = $$tokenId;
+    var self = $TonkPumpFactory$_contract_load();
+    var res = self~$TonkPumpFactory$_fun_ammContractAddress($tokenId);
+    return res;
+}
+
+_ %allContracts() method_id(121827) {
+    var self = $TonkPumpFactory$_contract_load();
+    var res = self~$TonkPumpFactory$_fun_allContracts();
+    return res;
+}
+
+_ %deployFee() method_id(121760) {
+    var self = $TonkPumpFactory$_contract_load();
+    var res = self~$TonkPumpFactory$_fun_deployFee();
+    return res;
+}
+
+_ %myAddress() method_id(77701) {
+    var self = $TonkPumpFactory$_contract_load();
+    var res = self~$TonkPumpFactory$_fun_myAddress();
+    return res;
+}
+
+_ %id() method_id(105872) {
+    var self = $TonkPumpFactory$_contract_load();
+    var res = self~$TonkPumpFactory$_fun_id();
+    return res;
+}
+
+_ %balance() method_id(104128) {
+    var self = $TonkPumpFactory$_contract_load();
+    var res = self~$TonkPumpFactory$_fun_balance();
+    return res;
+}
+
+_ %get_contract_storage_fee() method_id(91307) {
+    var self = $TonkPumpFactory$_contract_load();
+    var res = self~$TonkPumpFactory$_fun_get_contract_storage_fee();
+    return res;
+}
+
+_ %owner() method_id(83229) {
+    var self = $TonkPumpFactory$_contract_load();
+    var res = self~$TonkPumpFactory$_fun_owner();
+    return res;
+}
+
+_ %stopped() method_id(74107) {
+    var self = $TonkPumpFactory$_contract_load();
+    var res = self~$TonkPumpFactory$_fun_stopped();
+    return res;
+}
+
+_ supported_interfaces() method_id {
+    return (
+        "org.ton.introspection.v0"H >> 128,
+        "org.ton.abi.ipfs.v0"H >> 128,
+        "org.ton.deploy.lazy.v0"H >> 128,
+        "org.ton.debug.v0"H >> 128,
+        "org.ton.chain.workchain.v0"H >> 128,
+        "org.ton.ownable"H >> 128,
+        "org.ton.stoppable"H >> 128,
+        "org.ton.resumable"H >> 128
+    );
+}
+
+_ get_abi_ipfs() method_id {
+    return "ipfs://QmbA54oa9PefWRumi9urCEyJKYXy9PNdSUh5TeAEbdvuGb";
+}
+
+_ lazy_deployment_completed() method_id {
+    return get_data().begin_parse().load_int(1);
+}
+
+;;
+;; Routing of a Contract TonkPumpFactory
+;;
+
+((int, int, slice, int, int, cell), int) $TonkPumpFactory$_contract_router_internal((int, int, slice, int, int, cell) self, int msg_bounced, slice in_msg) impure inline_ref {
+    ;; Handle bounced messages
+    if (msg_bounced) {
+        return (self, true);
+    }
+    
+    ;; Parse incoming message
+    int op = 0;
+    if (slice_bits(in_msg) >= 32) {
+        op = in_msg.preload_uint(32);
+    }
+    
+    
+    ;; Receive empty message
+    if ((op == 0) & (slice_bits(in_msg) <= 32)) {
+        self~%$TonkPumpFactory$_internal_empty();
+        return (self, true);
+    }
+    
+    ;; Receive DeployContractAndAMM message
+    if (op == 2291209167) {
+        var msg = in_msg~$DeployContractAndAMM$_load();
+        self~$TonkPumpFactory$_internal_binary_DeployContractAndAMM(msg);
+        return (self, true);
+    }
+    
+    ;; Receive ChangeOwner message
+    if (op == 2174598809) {
+        var msg = in_msg~$ChangeOwner$_load();
+        self~$TonkPumpFactory$_internal_binary_ChangeOwner(msg);
+        return (self, true);
+    }
+    
+    ;; Receive SafeWithdraw message
+    if (op == 3694826077) {
+        var msg = in_msg~$SafeWithdraw$_load();
+        self~$TonkPumpFactory$_internal_binary_SafeWithdraw(msg);
+        return (self, true);
+    }
+    
+    ;; Receive Deploy message
+    if (op == 2490013878) {
+        var msg = in_msg~$Deploy$_load();
+        self~$TonkPumpFactory$_internal_binary_Deploy(msg);
+        return (self, true);
+    }
+    
+    ;; Text Receivers
+    if (op == 0) {
+        var text_op = slice_hash(in_msg);
+        
+        ;; Receive "ChangeDeploymentFee" message
+        if (text_op == 0xf2205fee0a5a8480985b163635e583260fb940b77ff1e7c166e20765dd8e7f78) {
+            self~$TonkPumpFactory$_internal_text_f2205fee0a5a8480985b163635e583260fb940b77ff1e7c166e20765dd8e7f78();
+            return (self, true);
+        }
+        
+        ;; Receive "Withdraw" message
+        if (text_op == 0x250b76e2b9576fc6b4c45129483006b0003a0c39b6f7ae413d177f4e3479dbca) {
+            self~$TonkPumpFactory$_internal_text_250b76e2b9576fc6b4c45129483006b0003a0c39b6f7ae413d177f4e3479dbca();
+            return (self, true);
+        }
+        
+        ;; Receive "Stop" message
+        if (text_op == 0xbcfaf776907c719cc8d379d8f194aaaa27e8ca2871cd591781721f215a454501) {
+            self~$TonkPumpFactory$_internal_text_bcfaf776907c719cc8d379d8f194aaaa27e8ca2871cd591781721f215a454501();
+            return (self, true);
+        }
+        
+        ;; Receive "Resume" message
+        if (text_op == 0x6c8f44f45fedb4cdfed4de8db14aa5b13ad55d430f759d0669210b74c48fe3df) {
+            self~$TonkPumpFactory$_internal_text_6c8f44f45fedb4cdfed4de8db14aa5b13ad55d430f759d0669210b74c48fe3df();
+            return (self, true);
+        }
+    }
+    
+    return (self, false);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    var msg_flags = cs~load_uint(4);
+    var msg_bounced = -(msg_flags & 1);
+    slice msg_sender_addr = __tact_verify_address(cs~load_msg_addr());
+    __tact_context = (msg_bounced, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var self = $TonkPumpFactory$_contract_load();
+    
+    ;; Handle operation
+    int handled = self~$TonkPumpFactory$_contract_router_internal(msg_bounced, in_msg);
+    
+    ;; Throw if not handled
+    throw_unless(130, handled);
+    
+    ;; Persist state
+    $TonkPumpFactory$_contract_store(self);
+}

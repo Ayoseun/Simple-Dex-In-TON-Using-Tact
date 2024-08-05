@@ -1,0 +1,232 @@
+#pragma version =0.4.4;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+#include "tact_TonkPumpJetton.headers.fc";
+#include "tact_TonkPumpJetton.stdlib.fc";
+#include "tact_TonkPumpJetton.storage.fc";
+
+;;
+;; Contract TonkPumpJetton functions
+;;
+
+(int, slice, slice, cell, int, int, int, int, int, int, int, int, int) $TonkPumpJetton$_contract_init(slice $owner, slice $_dev, cell $content, int $_minter) impure inline_ref {
+    var (($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter)) = (null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null());
+    $self'minter = $_minter;
+    $self'totalSupply = 0;
+    $self'ammToken = 0;
+    $self'devToken = 0;
+    $self'exchangeToken = 0;
+    $self'yciycToken = 0;
+    $self'owner = $owner;
+    $self'dev = $_dev;
+    $self'mintable = true;
+    $self'devMintable = true;
+    $self'reserveMintable = true;
+    $self'content = $content;
+    $self'max_supply = 100000000000000000;
+    return ($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter);
+}
+
+((int, slice, slice, cell, int, int, int, int, int, int, int, int, int), (cell, cell)) $TonkPumpJetton$_fun_getJettonWalletInit((int, slice, slice, cell, int, int, int, int, int, int, int, int, int) $self, slice $address) impure inline_ref {
+    var (($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter)) = $self;
+    return (($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter), $TonkPumpDefaultWallet$_init_child(__tact_context_sys, my_address(), $address));
+}
+
+((int, slice, slice, cell, int, int, int, int, int, int, int, int, int), ()) $TonkPumpJetton$_fun_mint((int, slice, slice, cell, int, int, int, int, int, int, int, int, int) $self, slice $to, int $amount, slice $response_destination) impure inline_ref {
+    var (($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter)) = $self;
+    throw_unless(6898, (($self'totalSupply + $amount) <= $self'max_supply));
+    $self'totalSupply = ($self'totalSupply + $amount);
+    var ($winit'code, $winit'data) = ($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter)~$TonkPumpJetton$_fun_getJettonWalletInit($to);
+    $global_send($SendParameters$_constructor_to_value_bounce_mode_body_code_data($global_contractAddress(($winit'code, $winit'data)), 0, false, 64, $TokenTransferInternal$_store_cell($TokenTransferInternal$_constructor_queryId_amount_from_response_destination_forward_ton_amount_forward_payload(0, $amount, my_address(), $response_destination, 0, $global_emptySlice())), $winit'code, $winit'data));
+    return (($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter), ());
+}
+
+((int, slice, slice, cell, int, int, int, int, int, int, int, int, int), ()) $TonkPumpJetton$_fun_requireWallet((int, slice, slice, cell, int, int, int, int, int, int, int, int, int) $self, slice $owner) impure inline_ref {
+    var (($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter)) = $self;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    var ($winit'code, $winit'data) = ($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter)~$TonkPumpJetton$_fun_getJettonWalletInit($owner);
+    throw_unless(4429, ( __tact_slice_eq_bits($ctx'sender, $global_contractAddress(($winit'code, $winit'data))) ));
+    return (($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter), ());
+}
+
+((int, slice, slice, cell, int, int, int, int, int, int, int, int, int), (int, int, slice, cell, cell)) $TonkPumpJetton$_fun_get_jetton_data((int, slice, slice, cell, int, int, int, int, int, int, int, int, int) $self) impure inline_ref {
+    var (($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter)) = $self;
+    cell $code = $StateInit$_get_code(($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter)~$TonkPumpJetton$_fun_getJettonWalletInit(my_address()));
+    return (($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter), $JettonData$_constructor_totalSupply_mintable_owner_content_walletCode($self'totalSupply, $self'mintable, $self'owner, $self'content, $code));
+}
+
+((int, slice, slice, cell, int, int, int, int, int, int, int, int, int), slice) $TonkPumpJetton$_fun_get_wallet_address((int, slice, slice, cell, int, int, int, int, int, int, int, int, int) $self, slice $owner) impure inline_ref {
+    var (($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter)) = $self;
+    var ($winit'code, $winit'data) = ($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter)~$TonkPumpJetton$_fun_getJettonWalletInit($owner);
+    return (($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter), $global_contractAddress(($winit'code, $winit'data)));
+}
+
+((int, slice, slice, cell, int, int, int, int, int, int, int, int, int), ()) $TonkPumpJetton$_fun_requireOwner((int, slice, slice, cell, int, int, int, int, int, int, int, int, int) $self) impure inline_ref {
+    var (($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter)) = $self;
+    throw_unless(132, ( __tact_slice_eq_bits($self'owner, __tact_context_get_sender()) ));
+    return (($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter), ());
+}
+
+((int, slice, slice, cell, int, int, int, int, int, int, int, int, int), slice) $TonkPumpJetton$_fun_owner((int, slice, slice, cell, int, int, int, int, int, int, int, int, int) $self) impure inline_ref {
+    var (($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter)) = $self;
+    return (($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter), $self'owner);
+}
+
+;;
+;; Receivers of a Contract TonkPumpJetton
+;;
+
+(((int, slice, slice, cell, int, int, int, int, int, int, int, int, int)), ()) $TonkPumpJetton$_internal_binary_Mint((int, slice, slice, cell, int, int, int, int, int, int, int, int, int) $self, (int, slice, int) $msg) impure inline {
+    var ($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter) = $self;
+    var ($msg'amount, $msg'receiver, $msg'minter) = $msg;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    throw_unless(18668, $self'mintable);
+    ($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter)~$TonkPumpJetton$_fun_mint($msg'receiver, $msg'amount, $self'owner);
+    return (($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter), ());
+}
+
+((int, slice, slice, cell, int, int, int, int, int, int, int, int, int), ()) $TonkPumpJetton$_internal_text_dc004c5b75be74376bd79df8713f2390620cc8a3095068b0583eb28ca3ac8ba0((int, slice, slice, cell, int, int, int, int, int, int, int, int, int) $self) impure inline {
+    var ($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter) = $self;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    throw_unless(3734, ( __tact_slice_eq_bits($self'owner, $ctx'sender) ));
+    $self'mintable = false;
+    return (($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter), ());
+}
+
+(((int, slice, slice, cell, int, int, int, int, int, int, int, int, int)), ()) $TonkPumpJetton$_internal_binary_TokenUpdateContent((int, slice, slice, cell, int, int, int, int, int, int, int, int, int) $self, (cell) $msg) impure inline {
+    var ($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter) = $self;
+    var ($msg'content) = $msg;
+    ($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter)~$TonkPumpJetton$_fun_requireOwner();
+    $self'content = $msg'content;
+    return (($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter), ());
+}
+
+(((int, slice, slice, cell, int, int, int, int, int, int, int, int, int)), ()) $TonkPumpJetton$_internal_binary_TokenBurnNotification((int, slice, slice, cell, int, int, int, int, int, int, int, int, int) $self, (int, int, slice, slice) $msg) impure inline {
+    var ($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter) = $self;
+    var ($msg'queryId, $msg'amount, $msg'owner, $msg'response_destination) = $msg;
+    ($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter)~$TonkPumpJetton$_fun_requireWallet($msg'owner);
+    $self'totalSupply = ($self'totalSupply - $msg'amount);
+    if ((~ null?($msg'response_destination))) {
+        $global_send($SendParameters$_constructor_to_value_bounce_mode_body(__tact_not_null($msg'response_destination), 0, false, 66, $TokenExcesses$_store_cell($TokenExcesses$_constructor_queryId($msg'queryId))));
+    }
+    return (($self'totalSupply, $self'owner, $self'dev, $self'content, $self'mintable, $self'devMintable, $self'reserveMintable, $self'max_supply, $self'ammToken, $self'devToken, $self'exchangeToken, $self'yciycToken, $self'minter), ());
+}
+
+;;
+;; Get methods of a Contract TonkPumpJetton
+;;
+
+_ %get_jetton_data() method_id(106029) {
+    var self = $TonkPumpJetton$_contract_load();
+    var res = self~$TonkPumpJetton$_fun_get_jetton_data();
+    return $JettonData$_to_external(res);
+}
+
+_ %get_wallet_address(slice $$owner) method_id(103289) {
+    slice $owner = __tact_verify_address($$owner);
+    var self = $TonkPumpJetton$_contract_load();
+    var res = self~$TonkPumpJetton$_fun_get_wallet_address($owner);
+    return res;
+}
+
+_ %owner() method_id(83229) {
+    var self = $TonkPumpJetton$_contract_load();
+    var res = self~$TonkPumpJetton$_fun_owner();
+    return res;
+}
+
+_ supported_interfaces() method_id {
+    return (
+        "org.ton.introspection.v0"H >> 128,
+        "org.ton.abi.ipfs.v0"H >> 128,
+        "org.ton.deploy.lazy.v0"H >> 128,
+        "org.ton.debug.v0"H >> 128,
+        "org.ton.chain.workchain.v0"H >> 128,
+        "org.ton.jetton.master"H >> 128,
+        "org.ton.ownable"H >> 128
+    );
+}
+
+_ get_abi_ipfs() method_id {
+    return "ipfs://QmXjLToyXNQ1jyQdLuPYhvTJkSTPQ9ESQqsQ5bNDpMTsiZ";
+}
+
+_ lazy_deployment_completed() method_id {
+    return get_data().begin_parse().load_int(1);
+}
+
+;;
+;; Routing of a Contract TonkPumpJetton
+;;
+
+((int, slice, slice, cell, int, int, int, int, int, int, int, int, int), int) $TonkPumpJetton$_contract_router_internal((int, slice, slice, cell, int, int, int, int, int, int, int, int, int) self, int msg_bounced, slice in_msg) impure inline_ref {
+    ;; Handle bounced messages
+    if (msg_bounced) {
+        return (self, true);
+    }
+    
+    ;; Parse incoming message
+    int op = 0;
+    if (slice_bits(in_msg) >= 32) {
+        op = in_msg.preload_uint(32);
+    }
+    
+    
+    ;; Receive Mint message
+    if (op == 2789447861) {
+        var msg = in_msg~$Mint$_load();
+        self~$TonkPumpJetton$_internal_binary_Mint(msg);
+        return (self, true);
+    }
+    
+    ;; Receive TokenUpdateContent message
+    if (op == 2937889386) {
+        var msg = in_msg~$TokenUpdateContent$_load();
+        self~$TonkPumpJetton$_internal_binary_TokenUpdateContent(msg);
+        return (self, true);
+    }
+    
+    ;; Receive TokenBurnNotification message
+    if (op == 2078119902) {
+        var msg = in_msg~$TokenBurnNotification$_load();
+        self~$TonkPumpJetton$_internal_binary_TokenBurnNotification(msg);
+        return (self, true);
+    }
+    
+    ;; Text Receivers
+    if (op == 0) {
+        var text_op = slice_hash(in_msg);
+        
+        ;; Receive "Owner: MintClose" message
+        if (text_op == 0xdc004c5b75be74376bd79df8713f2390620cc8a3095068b0583eb28ca3ac8ba0) {
+            self~$TonkPumpJetton$_internal_text_dc004c5b75be74376bd79df8713f2390620cc8a3095068b0583eb28ca3ac8ba0();
+            return (self, true);
+        }
+    }
+    
+    return (self, false);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    var msg_flags = cs~load_uint(4);
+    var msg_bounced = -(msg_flags & 1);
+    slice msg_sender_addr = __tact_verify_address(cs~load_msg_addr());
+    __tact_context = (msg_bounced, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var self = $TonkPumpJetton$_contract_load();
+    
+    ;; Handle operation
+    int handled = self~$TonkPumpJetton$_contract_router_internal(msg_bounced, in_msg);
+    
+    ;; Throw if not handled
+    throw_unless(130, handled);
+    
+    ;; Persist state
+    $TonkPumpJetton$_contract_store(self);
+}

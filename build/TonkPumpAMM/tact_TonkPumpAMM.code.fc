@@ -1,0 +1,312 @@
+#pragma version =0.4.4;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+#include "tact_TonkPumpAMM.headers.fc";
+#include "tact_TonkPumpAMM.stdlib.fc";
+#include "tact_TonkPumpAMM.storage.fc";
+
+;;
+;; Contract TonkPumpAMM functions
+;;
+
+(slice, slice, int, slice, int, int, int, int, int, int, int, slice, int) $TonkPumpAMM$_contract_init(int $_id, slice $_owner, slice $_dev, slice $_jettonAddress, slice $_ticker) impure inline_ref {
+    var (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)) = (null(), null(), null(), null(), 0, 0, null(), null(), null(), null(), null(), null(), 0);
+    $self'id = $_id;
+    $self'owner = $_owner;
+    $self'dev = $_dev;
+    $self'tonkPumpJettonAddress = $_jettonAddress;
+    $self'jettonSupply = 0;
+    $self'maxSupply = 100000000000000000;
+    $self'ticker = $_ticker;
+    $self'queryId = 0;
+    $self'basePrice = 24;
+    $self'priceIncrement = 1000000000;
+    $self'isDevMint = false;
+    return ($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply);
+}
+
+((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int), int) $TonkPumpAMM$_fun_calculateCurrentPrice((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int) $self) impure inline_ref {
+    var (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)) = $self;
+    return (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply), (($self'basePrice + ($self'jettonSupply * $self'priceIncrement)) / 1000000000));
+}
+
+((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int), ()) $TonkPumpAMM$_fun_mintTokens((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int) $self, int $amount, slice $receiver) impure inline_ref {
+    var (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)) = $self;
+    $global_send($SendParameters$_constructor_to_value_mode_bounce_body($self'tonkPumpJettonAddress, 50000000, 2, true, $Mint$_store_cell($Mint$_constructor_amount_receiver_minter($amount, $receiver, 0))));
+    return (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply), ());
+}
+
+((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int), slice) $TonkPumpAMM$_fun_ticker((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int) $self) impure inline_ref {
+    var (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)) = $self;
+    return (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply), $self'ticker);
+}
+
+((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int), slice) $TonkPumpAMM$_fun_ammAddress((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int) $self) impure inline_ref {
+    var (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)) = $self;
+    return (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply), my_address());
+}
+
+((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int), slice) $TonkPumpAMM$_fun_jettonAddress((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int) $self) impure inline_ref {
+    var (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)) = $self;
+    return (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply), $self'tonkPumpJettonAddress);
+}
+
+((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int), int) $TonkPumpAMM$_fun_jettonMaxSupply((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int) $self) impure inline_ref {
+    var (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)) = $self;
+    return (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply), $self'maxSupply);
+}
+
+((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int), int) $TonkPumpAMM$_fun_MarketCap((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int) $self) impure inline_ref {
+    var (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)) = $self;
+    return (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply), (($self'jettonSupply * ($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)~$TonkPumpAMM$_fun_calculateCurrentPrice()) / 1000000000));
+}
+
+((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int), int) $TonkPumpAMM$_fun_jettonTotalSupply((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int) $self) impure inline_ref {
+    var (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)) = $self;
+    return (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply), $self'jettonSupply);
+}
+
+((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int), int) $TonkPumpAMM$_fun_id((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int) $self) impure inline_ref {
+    var (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)) = $self;
+    return (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply), $self'id);
+}
+
+((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int), int) $TonkPumpAMM$_fun_tonBalance((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int) $self) impure inline_ref {
+    var (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)) = $self;
+    return (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply), __tact_my_balance());
+}
+
+((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int), (cell, cell)) $TonkPumpAMM$_fun_getJettonWalletInit((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int) $self, slice $address) impure inline_ref {
+    var (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)) = $self;
+    return (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply), $TonkPumpDefaultWallet$_init_child(__tact_context_sys, $self'tonkPumpJettonAddress, $address));
+}
+
+((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int), slice) $TonkPumpAMM$_fun_ammJettonWalletAddress((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int) $self) impure inline_ref {
+    var (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)) = $self;
+    return (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply), $global_contractAddress(($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)~$TonkPumpAMM$_fun_getJettonWalletInit(my_address())));
+}
+
+((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int), int) $TonkPumpAMM$_fun_priceFromSupply((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int) $self) impure inline_ref {
+    var (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)) = $self;
+    return (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply), $self'priceIncrement);
+}
+
+((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int), ()) $TonkPumpAMM$_fun_sendTon((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int) $self, int $amount) impure inline_ref {
+    var (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)) = $self;
+    throw_unless(34030, ($amount > 0));
+    $global_send($SendParameters$_constructor_to_bounce_value_mode(__tact_context_get_sender(), true, $amount, 66));
+    return (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply), ());
+}
+
+;;
+;; Receivers of a Contract TonkPumpAMM
+;;
+
+(((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int)), ()) $TonkPumpAMM$_internal_binary_Sell((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int) $self, (int, int) $msg) impure inline {
+    var ($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply) = $self;
+    var ($msg'amount, $msg'tonInDollars) = $msg;
+    throw_unless(48516, $self'isDevMint);
+    int $currentPrice = ($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)~$TonkPumpAMM$_fun_calculateCurrentPrice();
+    int $tonOut = (($msg'amount * $currentPrice) / 1000000000);
+    throw_unless(43681, ($tonOut <= $self'balance));
+    $self'balance = ($self'balance - $tonOut);
+    var ($initContract'code, $initContract'data) = ($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)~$TonkPumpAMM$_fun_getJettonWalletInit($Context$_get_sender(__tact_context_get()));
+    $global_send($SendParameters$_constructor_to_value_mode_bounce_body_code_data($global_contractAddress(($initContract'code, $initContract'data)), 500000000, 2, false, $TokenBurn$_store_cell($TokenBurn$_constructor_queryId_amount_response_destination_owner($self'queryId, 5000000000, $self'owner, $Context$_get_sender(__tact_context_get()))), $initContract'code, $initContract'data));
+    $self'queryId = $self'queryId + 1;
+    ($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)~$TonkPumpAMM$_fun_sendTon($tonOut);
+    $self'jettonSupply = ($self'jettonSupply - $msg'amount);
+    return (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply), ());
+}
+
+(((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int)), ()) $TonkPumpAMM$_internal_binary_Buy((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int) $self, (int) $msg) impure inline {
+    var ($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply) = $self;
+    var ($msg'tonInDollars) = $msg;
+    throw_unless(48516, $self'isDevMint);
+    int $tonAmount = $Context$_get_value(__tact_context_get());
+    int $currentPrice = ($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)~$TonkPumpAMM$_fun_calculateCurrentPrice();
+    int $jettonsOut = (($tonAmount * 1000000000) / $currentPrice);
+    throw_unless(14796, (($self'jettonSupply + $jettonsOut) <= $self'maxSupply));
+    $global_send($SendParameters$_constructor_to_value_mode_bounce_body($self'tonkPumpJettonAddress, 50000000, 2, true, $Mint$_store_cell($Mint$_constructor_amount_receiver_minter(500000000000, $Context$_get_sender(__tact_context_get()), 0))));
+    $self'jettonSupply = ($self'jettonSupply + $jettonsOut);
+    return (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply), ());
+}
+
+(((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int)), ()) $TonkPumpAMM$_internal_binary_DevMint((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int) $self, (slice, slice, slice) $msg) impure inline {
+    var ($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply) = $self;
+    var ($msg'yciycWallet, $msg'marketMakerWallet, $msg'exchangeWallet) = $msg;
+    throw_unless(18720, ( __tact_slice_eq_bits($self'dev, $Context$_get_sender(__tact_context_get())) ));
+    throw_unless(51687, (~ $self'isDevMint));
+    int $devToken = 2000000000000000;
+    int $yciycToken = 100000000000000;
+    int $exchangeToken = 10000000000000000;
+    int $marketMakerToken = 3000000000000000;
+    ($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)~$TonkPumpAMM$_fun_mintTokens($devToken, $Context$_get_sender(__tact_context_get()));
+    ($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)~$TonkPumpAMM$_fun_mintTokens($yciycToken, $msg'yciycWallet);
+    ($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)~$TonkPumpAMM$_fun_mintTokens($exchangeToken, $msg'exchangeWallet);
+    ($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)~$TonkPumpAMM$_fun_mintTokens($marketMakerToken, $msg'marketMakerWallet);
+    int $total = ((($devToken + $yciycToken) + $exchangeToken) + $marketMakerToken);
+    $self'jettonSupply = ($self'jettonSupply + $total);
+    $self'isDevMint = true;
+    return (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply), ());
+}
+
+(((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int)), ()) $TonkPumpAMM$_internal_binary_Deploy((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int) $self, (int) $deploy) impure inline {
+    var ($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply) = $self;
+    var ($deploy'queryId) = $deploy;
+    ($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply)~$TonkPumpAMM$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId)));
+    return (($self'owner, $self'ticker, $self'isDevMint, $self'tonkPumpJettonAddress, $self'jettonReserve, $self'balance, $self'maxSupply, $self'id, $self'queryId, $self'basePrice, $self'priceIncrement, $self'dev, $self'jettonSupply), ());
+}
+
+;;
+;; Get methods of a Contract TonkPumpAMM
+;;
+
+_ %ticker() method_id(127235) {
+    var self = $TonkPumpAMM$_contract_load();
+    var res = self~$TonkPumpAMM$_fun_ticker();
+    return res;
+}
+
+_ %ammAddress() method_id(80142) {
+    var self = $TonkPumpAMM$_contract_load();
+    var res = self~$TonkPumpAMM$_fun_ammAddress();
+    return res;
+}
+
+_ %jettonAddress() method_id(114762) {
+    var self = $TonkPumpAMM$_contract_load();
+    var res = self~$TonkPumpAMM$_fun_jettonAddress();
+    return res;
+}
+
+_ %jettonMaxSupply() method_id(94435) {
+    var self = $TonkPumpAMM$_contract_load();
+    var res = self~$TonkPumpAMM$_fun_jettonMaxSupply();
+    return res;
+}
+
+_ %MarketCap() method_id(66503) {
+    var self = $TonkPumpAMM$_contract_load();
+    var res = self~$TonkPumpAMM$_fun_MarketCap();
+    return res;
+}
+
+_ %jettonTotalSupply() method_id(65669) {
+    var self = $TonkPumpAMM$_contract_load();
+    var res = self~$TonkPumpAMM$_fun_jettonTotalSupply();
+    return res;
+}
+
+_ %id() method_id(105872) {
+    var self = $TonkPumpAMM$_contract_load();
+    var res = self~$TonkPumpAMM$_fun_id();
+    return res;
+}
+
+_ %tonBalance() method_id(129370) {
+    var self = $TonkPumpAMM$_contract_load();
+    var res = self~$TonkPumpAMM$_fun_tonBalance();
+    return res;
+}
+
+_ %ammJettonWalletAddress() method_id(91751) {
+    var self = $TonkPumpAMM$_contract_load();
+    var res = self~$TonkPumpAMM$_fun_ammJettonWalletAddress();
+    return res;
+}
+
+_ %priceFromSupply() method_id(85471) {
+    var self = $TonkPumpAMM$_contract_load();
+    var res = self~$TonkPumpAMM$_fun_priceFromSupply();
+    return res;
+}
+
+_ supported_interfaces() method_id {
+    return (
+        "org.ton.introspection.v0"H >> 128,
+        "org.ton.abi.ipfs.v0"H >> 128,
+        "org.ton.deploy.lazy.v0"H >> 128,
+        "org.ton.debug.v0"H >> 128,
+        "org.ton.chain.workchain.v0"H >> 128
+    );
+}
+
+_ get_abi_ipfs() method_id {
+    return "ipfs://QmTtNaAfqZewJkKsA291jbi4i7f4cgdmGXLiDJnv3t1FpK";
+}
+
+_ lazy_deployment_completed() method_id {
+    return get_data().begin_parse().load_int(1);
+}
+
+;;
+;; Routing of a Contract TonkPumpAMM
+;;
+
+((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int), int) $TonkPumpAMM$_contract_router_internal((slice, slice, int, slice, int, int, int, int, int, int, int, slice, int) self, int msg_bounced, slice in_msg) impure inline_ref {
+    ;; Handle bounced messages
+    if (msg_bounced) {
+        return (self, true);
+    }
+    
+    ;; Parse incoming message
+    int op = 0;
+    if (slice_bits(in_msg) >= 32) {
+        op = in_msg.preload_uint(32);
+    }
+    
+    
+    ;; Receive Sell message
+    if (op == 1698813713) {
+        var msg = in_msg~$Sell$_load();
+        self~$TonkPumpAMM$_internal_binary_Sell(msg);
+        return (self, true);
+    }
+    
+    ;; Receive Buy message
+    if (op == 534828082) {
+        var msg = in_msg~$Buy$_load();
+        self~$TonkPumpAMM$_internal_binary_Buy(msg);
+        return (self, true);
+    }
+    
+    ;; Receive DevMint message
+    if (op == 1333855987) {
+        var msg = in_msg~$DevMint$_load();
+        self~$TonkPumpAMM$_internal_binary_DevMint(msg);
+        return (self, true);
+    }
+    
+    ;; Receive Deploy message
+    if (op == 2490013878) {
+        var msg = in_msg~$Deploy$_load();
+        self~$TonkPumpAMM$_internal_binary_Deploy(msg);
+        return (self, true);
+    }
+    
+    return (self, false);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    var msg_flags = cs~load_uint(4);
+    var msg_bounced = -(msg_flags & 1);
+    slice msg_sender_addr = __tact_verify_address(cs~load_msg_addr());
+    __tact_context = (msg_bounced, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var self = $TonkPumpAMM$_contract_load();
+    
+    ;; Handle operation
+    int handled = self~$TonkPumpAMM$_contract_router_internal(msg_bounced, in_msg);
+    
+    ;; Throw if not handled
+    throw_unless(130, handled);
+    
+    ;; Persist state
+    $TonkPumpAMM$_contract_store(self);
+}

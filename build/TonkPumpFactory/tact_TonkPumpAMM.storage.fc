@@ -1,0 +1,252 @@
+;;
+;; Type: StateInit
+;; TLB: _ code:^cell data:^cell = StateInit
+;;
+
+((cell, cell)) $StateInit$_not_null(tuple v) inline {
+    throw_if(128, null?(v));
+    var (cell vvv'code, cell vvv'data) = __tact_tuple_destroy_2(v);
+    return (vvv'code, vvv'data);
+}
+
+;;
+;; Type: Context
+;; TLB: _ bounced:bool sender:address value:int257 raw:^slice = Context
+;;
+
+_ $Context$_get_sender((int, slice, int, slice) v) inline {
+    var (v'bounced, v'sender, v'value, v'raw) = v;
+    return v'sender;
+}
+
+_ $Context$_get_value((int, slice, int, slice) v) inline {
+    var (v'bounced, v'sender, v'value, v'raw) = v;
+    return v'value;
+}
+
+;;
+;; Type: SendParameters
+;; TLB: _ bounce:bool to:address value:int257 mode:int257 body:Maybe ^cell code:Maybe ^cell data:Maybe ^cell = SendParameters
+;;
+
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_bounce_to_value_mode_body_code_data(int bounce, slice to, int value, int mode, cell body, cell code, cell data) inline {
+    return (bounce, to, value, mode, body, code, data);
+}
+
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_bounce_value_mode(slice to, int bounce, int value, int mode) inline {
+    return (bounce, to, value, mode, null(), null(), null());
+}
+
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_value_mode_bounce_body(slice to, int value, int mode, int bounce, cell body) inline {
+    return (bounce, to, value, mode, body, null(), null());
+}
+
+;;
+;; Type: Deploy
+;; Header: 0x946a98b6
+;; TLB: deploy#946a98b6 queryId:uint64 = Deploy
+;;
+
+(slice, ((int))) $Deploy$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 2490013878);
+    var v'queryId = sc_0~load_uint(64);
+    return (sc_0, (v'queryId));
+}
+
+;;
+;; Type: DeployOk
+;; Header: 0xaff90f57
+;; TLB: deploy_ok#aff90f57 queryId:uint64 = DeployOk
+;;
+
+builder $DeployOk$_store(builder build_0, (int) v) inline {
+    var (v'queryId) = v;
+    build_0 = store_uint(build_0, 2952335191, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    return build_0;
+}
+
+cell $DeployOk$_store_cell((int) v) inline {
+    return $DeployOk$_store(begin_cell(), v).end_cell();
+}
+
+((int)) $DeployOk$_constructor_queryId(int queryId) inline {
+    return (queryId);
+}
+
+;;
+;; Type: Buy
+;; Header: 0x6fbb7c4d
+;; TLB: buy#6fbb7c4d tonInDollars:uint256 v:int257 = Buy
+;;
+
+(slice, ((int, int))) $Buy$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 1874558029);
+    var v'tonInDollars = sc_0~load_uint(256);
+    var v'v = sc_0~load_int(257);
+    return (sc_0, (v'tonInDollars, v'v));
+}
+
+;;
+;; Type: DevMint
+;; Header: 0x4f8106f3
+;; TLB: dev_mint#4f8106f3 yciycWallet:address marketMakerWallet:address exchangeWallet:address = DevMint
+;;
+
+(slice, ((slice, slice, slice))) $DevMint$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 1333855987);
+    var v'yciycWallet = sc_0~__tact_load_address();
+    var v'marketMakerWallet = sc_0~__tact_load_address();
+    var v'exchangeWallet = sc_0~__tact_load_address();
+    return (sc_0, (v'yciycWallet, v'marketMakerWallet, v'exchangeWallet));
+}
+
+;;
+;; Type: Mint
+;; Header: 0xa64398b5
+;; TLB: mint#a64398b5 amount:int257 receiver:address minter:int257 = Mint
+;;
+
+builder $Mint$_store(builder build_0, (int, slice, int) v) inline {
+    var (v'amount, v'receiver, v'minter) = v;
+    build_0 = store_uint(build_0, 2789447861, 32);
+    build_0 = build_0.store_int(v'amount, 257);
+    build_0 = __tact_store_address(build_0, v'receiver);
+    build_0 = build_0.store_int(v'minter, 257);
+    return build_0;
+}
+
+cell $Mint$_store_cell((int, slice, int) v) inline {
+    return $Mint$_store(begin_cell(), v).end_cell();
+}
+
+((int, slice, int)) $Mint$_constructor_amount_receiver_minter(int amount, slice receiver, int minter) inline {
+    return (amount, receiver, minter);
+}
+
+;;
+;; Type: TokenNotification
+;; Header: 0x7362d09c
+;; TLB: token_notification#7362d09c queryId:uint64 amount:coins from:address forward_payload:remainder<slice> = TokenNotification
+;;
+
+(slice, ((int, int, slice, slice))) $TokenNotification$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 1935855772);
+    var v'queryId = sc_0~load_uint(64);
+    var v'amount = sc_0~load_coins();
+    var v'from = sc_0~__tact_load_address();
+    var v'forward_payload = sc_0;
+    return (sc_0, (v'queryId, v'amount, v'from, v'forward_payload));
+}
+
+;;
+;; Type: TonkPumpDefaultWallet
+;;
+
+builder $TonkPumpDefaultWallet$init$_store(builder build_0, (slice, slice) v) inline {
+    var (v'master, v'owner) = v;
+    build_0 = __tact_store_address(build_0, v'master);
+    build_0 = __tact_store_address(build_0, v'owner);
+    return build_0;
+}
+
+(cell, cell) $TonkPumpDefaultWallet$_init_child(cell sys', slice $master, slice $owner) inline_ref {
+    slice sc' = sys'.begin_parse();
+    cell source = sc'~load_dict();
+    cell contracts = new_dict();
+    
+    ;; Contract Code: TonkPumpDefaultWallet
+    cell mine = __tact_dict_get_code(source, 4454);
+    contracts = __tact_dict_set_code(contracts, 4454, mine);
+    
+    ;; Build cell
+    builder b = begin_cell();
+    b = b.store_ref(begin_cell().store_dict(contracts).end_cell());
+    b = b.store_int(false, 1);
+    b = $TonkPumpDefaultWallet$init$_store(b, ($master, $owner));
+    return (mine, b.end_cell());
+}
+
+;;
+;; Type: TonkPumpAMM
+;;
+
+builder $TonkPumpAMM$_store(builder build_0, (slice, slice, int, slice, int, int, int, int, int, int, int, int, slice, int) v) inline {
+    var (v'owner, v'ticker, v'isDevMint, v'tonkPumpJettonAddress, v'jettonReserve, v'balance, v'maxSupply, v'id, v'v, v'queryId, v'basePrice, v'priceIncrement, v'dev, v'jettonSupply) = v;
+    build_0 = __tact_store_address(build_0, v'owner);
+    build_0 = build_0.store_ref(begin_cell().store_slice(v'ticker).end_cell());
+    build_0 = build_0.store_int(v'isDevMint, 1);
+    build_0 = __tact_store_address(build_0, v'tonkPumpJettonAddress);
+    build_0 = build_0.store_uint(v'jettonReserve, 256);
+    var build_1 = begin_cell();
+    build_1 = build_1.store_uint(v'balance, 256);
+    build_1 = build_1.store_uint(v'maxSupply, 256);
+    build_1 = build_1.store_uint(v'id, 8);
+    build_1 = build_1.store_uint(v'v, 256);
+    var build_2 = begin_cell();
+    build_2 = build_2.store_uint(v'queryId, 256);
+    build_2 = build_2.store_uint(v'basePrice, 256);
+    build_2 = build_2.store_uint(v'priceIncrement, 256);
+    var build_3 = begin_cell();
+    build_3 = __tact_store_address(build_3, v'dev);
+    build_3 = build_3.store_uint(v'jettonSupply, 256);
+    build_2 = store_ref(build_2, build_3.end_cell());
+    build_1 = store_ref(build_1, build_2.end_cell());
+    build_0 = store_ref(build_0, build_1.end_cell());
+    return build_0;
+}
+
+(slice, ((slice, slice, int, slice, int, int, int, int, int, int, int, int, slice, int))) $TonkPumpAMM$_load(slice sc_0) inline {
+    var v'owner = sc_0~__tact_load_address();
+    var v'ticker = sc_0~load_ref().begin_parse();
+    var v'isDevMint = sc_0~load_int(1);
+    var v'tonkPumpJettonAddress = sc_0~__tact_load_address();
+    var v'jettonReserve = sc_0~load_uint(256);
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'balance = sc_1~load_uint(256);
+    var v'maxSupply = sc_1~load_uint(256);
+    var v'id = sc_1~load_uint(8);
+    var v'v = sc_1~load_uint(256);
+    slice sc_2 = sc_1~load_ref().begin_parse();
+    var v'queryId = sc_2~load_uint(256);
+    var v'basePrice = sc_2~load_uint(256);
+    var v'priceIncrement = sc_2~load_uint(256);
+    slice sc_3 = sc_2~load_ref().begin_parse();
+    var v'dev = sc_3~__tact_load_address();
+    var v'jettonSupply = sc_3~load_uint(256);
+    return (sc_0, (v'owner, v'ticker, v'isDevMint, v'tonkPumpJettonAddress, v'jettonReserve, v'balance, v'maxSupply, v'id, v'v, v'queryId, v'basePrice, v'priceIncrement, v'dev, v'jettonSupply));
+}
+
+(slice, ((int, slice, slice, slice, slice, int))) $TonkPumpAMM$init$_load(slice sc_0) inline_ref {
+    var v'_id = sc_0~load_int(257);
+    var v'_owner = sc_0~__tact_load_address();
+    var v'_dev = sc_0~__tact_load_address();
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'_jettonAddress = sc_1~__tact_load_address();
+    var v'_ticker = sc_1~load_ref().begin_parse();
+    var v'v = sc_1~load_int(257);
+    return (sc_0, (v'_id, v'_owner, v'_dev, v'_jettonAddress, v'_ticker, v'v));
+}
+
+(slice, slice, int, slice, int, int, int, int, int, int, int, int, slice, int) $TonkPumpAMM$_contract_load() impure inline_ref {
+    slice $sc = get_data().begin_parse();
+    __tact_context_sys = $sc~load_ref();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$TonkPumpAMM$_load();
+    } else {
+        ;; Allow only workchain deployments
+        throw_unless(137, my_address().preload_uint(11) == 1024);
+        (int _id, slice _owner, slice _dev, slice _jettonAddress, slice _ticker, int v) = $sc~$TonkPumpAMM$init$_load();
+        $sc.end_parse();
+        return $TonkPumpAMM$_contract_init(_id, _owner, _dev, _jettonAddress, _ticker, v);
+    }
+}
+
+() $TonkPumpAMM$_contract_store((slice, slice, int, slice, int, int, int, int, int, int, int, int, slice, int) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_ref(__tact_context_sys);
+    b = b.store_int(true, 1);
+    b = $TonkPumpAMM$_store(b, v);
+    set_data(b.end_cell());
+}
